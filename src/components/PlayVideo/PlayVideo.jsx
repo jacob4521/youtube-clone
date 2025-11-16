@@ -6,8 +6,11 @@ import share from '../../assets/share.png';
 import save from '../../assets/save.png';
 import { API_KEY, value_converter } from '../../data';
 import moment from 'moment';
+import { useParams } from 'react-router-dom';
 
-const PlayVideo = ({ videoId }) => {
+const PlayVideo = () => {
+
+  const { videoId } = useParams();
 
   const [apiData, setApiData] = useState(null);
   const [channelData, setChannelData] = useState(null);
@@ -36,15 +39,14 @@ const PlayVideo = ({ videoId }) => {
 
   useEffect(() => {
     fetchVideoData();
-  }, []);
-
-  useEffect(() => {
-    fetchOtherData();
-  }, [apiData])
-
-  useEffect(() => {
-    fetchingCommentsData();
   }, [videoId]);
+
+  useEffect(() => {
+    if (apiData) {  // ✅ Only run when apiData exists
+      fetchOtherData();
+      fetchingCommentsData();
+    }
+  }, [apiData]);
 
   return (
     <>
@@ -63,7 +65,7 @@ const PlayVideo = ({ videoId }) => {
         </div>
         <hr />
         <div className="publisher">
-          <img src={channelData ? channelData.snippet.thumbnails.default.url : ""} alt="" />
+          <img src={channelData && channelData.snippet.thumbnails.default.url} alt="" />
           <div>
             <p>{apiData ? apiData.snippet.channelTitle : "Channel Name"}</p>
             <span>{channelData ? value_converter(channelData.statistics.subscriberCount) : "1M"} Subscribers</span>
@@ -74,7 +76,7 @@ const PlayVideo = ({ videoId }) => {
           <p>{apiData ? apiData.snippet.description.slice(0, 250) : "Description here"}</p>
           <hr />
           <h4>{apiData ? value_converter(apiData.statistics.commentCount) : 102} Comments</h4>
-          {commentsData ? commentsData.map((item, index) => {
+          {commentsData && commentsData.map((item, index) => {
             return (
               <div key={index} className="comment">
                 <img src={item.snippet.topLevelComment.snippet.authorProfileImageUrl} alt="" />
@@ -89,8 +91,7 @@ const PlayVideo = ({ videoId }) => {
                 </div>
               </div>
             );
-          }) : console.log("No Comments")}
-
+          })}
         </div>
       </div>
     </>
